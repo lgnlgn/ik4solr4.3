@@ -55,7 +55,7 @@ solr4.3的ik分词器（主要改动不是我完成的，只是指点。使用ma
 				  2、2个过滤器在schema.xml均增加了autoupdate配置项，为true，则						会定时去更新字典文件。
 		使用方法：在schema.xml中，添加自己的过滤器类，增加配置项。
 
-	四、UpdateThread.java：
+	四、TimelyThread.java：
 	停止词和同义词更新管理类，如果设置了autoupdate=true，则注册到此管理类中，由管理类定时去触发更新操作。
 	
 	五、schema.xml示例
