@@ -58,8 +58,8 @@ public class IKSynonymFilterFactory extends TokenFilterFactory implements
 		Analyzer analyzer = new Analyzer() {
 		      @Override
 		      protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-		        WhitespaceTokenizer tokenizer =  new WhitespaceTokenizer(Version.LUCENE_41, reader);
-		        TokenStream stream = ignoreCase ? new LowerCaseFilter(Version.LUCENE_41, tokenizer) : tokenizer;
+		        WhitespaceTokenizer tokenizer =  new WhitespaceTokenizer(Version.LUCENE_43, reader);
+		        TokenStream stream = ignoreCase ? new LowerCaseFilter(Version.LUCENE_43, tokenizer) : tokenizer;
 		        return new TokenStreamComponents(tokenizer, stream);
 		      }
 		    };

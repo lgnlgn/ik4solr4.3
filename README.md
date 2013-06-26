@@ -1,7 +1,7 @@
 ik4solr4.3
 ==========
 
-solr4.3的ik分词器（主要改动不是我完成的，只是指点。建议使用maven）
+solr4.3的ik分词器（主要改动不是我完成的，只是指点。使用maven）
 
 
 - 支持从solr自己的环境中获取自定义词典（使用solr的ResourceLoader, 只需要把字典文件放到conf目录里）
