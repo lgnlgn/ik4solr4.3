@@ -34,6 +34,7 @@ solr4.3的ik分词器（主要改动不是我完成的，只是指点。使用ma
 		请求参数：http://xxx/ikupdate?dicpath=dic.txt
 		注意事项：1、多个字典文件以逗号分隔。
 				  2、在Zookeeper集群上时，得先上传修改后的字典文件，再更新。
+				3、！！！！如果是cloud环境，需要对每台机器分别请求！！！！
 		使用方法：需在solrconfig.xml中配置
 	<requestHandler name="/ikupdate" class="org.wltea.analyzer.lucene.IKHandler">
      	<lst name="defaults">
