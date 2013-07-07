@@ -36,6 +36,7 @@ solr4.3的ik分词器（主要改动不是我完成的，只是指点。使用ma
 				  2、在Zookeeper集群上时，得先上传修改后的字典文件，再更新。
 				3、！！！！如果是cloud环境，需要对每台机器分别请求！！！！
 		使用方法：需在solrconfig.xml中配置
+		加入jar包存放位置（可选）：<lib dir="/data/solr-4.3.0/example/solr/collection1/lib" />
 	<requestHandler name="/ikupdate" class="org.wltea.analyzer.lucene.IKHandler">
      	<lst name="defaults">
      	</lst> 
@@ -59,20 +60,20 @@ solr4.3的ik分词器（主要改动不是我完成的，只是指点。使用ma
 	四、TimelyThread.java：
 	停止词和同义词更新管理类，如果设置了autoupdate=true，则注册到此管理类中，由管理类定时去触发更新操作。
 	
-	五、schema.xml示例
+	五、schema.xml示例( md格式用得不熟，格式可能需要调整，比如小于号和文字原来是连着的)
 
 
 
       < fieldType name="text_cn" class="solr.TextField" positionIncrementGap="100" >        
    
       <analyzer type="index" >       
-        < tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="true" />
+        < tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="false" />
         < filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
        < filter class="solr.LowerCaseFilterFactory"/>
       < /analyzer>
 
       < analyzer type="query">
-        <tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="true" dicPath="extDic.txt,extDic1.txt"/>
+        <tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="false" dicPath="extDic.txt"/>
         <filter class="org.wltea.analyzer.lucene.IKStopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" autoupdate="true"/>
 		<filter class="org.wltea.analyzer.lucene.IKSynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true" autoupdate="true"/>
         <filter class="solr.LowerCaseFilterFactory"/>
