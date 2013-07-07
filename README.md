@@ -36,13 +36,13 @@ solr4.3的ik分词器（主要改动不是我完成的，只是指点。使用ma
 				  2、在Zookeeper集群上时，得先上传修改后的字典文件，再更新。
 				3、！！！！如果是cloud环境，需要对每台机器分别请求！！！！
 		使用方法：需在solrconfig.xml中配置
-		加入jar包存放位置（可选）：<lib dir="/data/solr-4.3.0/example/solr/collection1/lib" />
 	<requestHandler name="/ikupdate" class="org.wltea.analyzer.lucene.IKHandler">
      	<lst name="defaults">
      	</lst> 
   	</requestHandler>
 	可以配置默认参数
 	<str name=”dicpath”>dic.txt</str>
+	加入jar包存放位置（可选）：<lib dir="/data/solr-4.3.0/example/solr/collection1/lib" />
 	
 	二、IKTokenizerFactory.java
 	IKTokenizer.java：用于生成IK分词器实例对象。
