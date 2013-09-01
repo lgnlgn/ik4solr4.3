@@ -4,20 +4,20 @@ import java.io.IOException;
 import java.util.Vector;
 
 //TODO optimize
-public class TimelyThread implements Runnable{
+public class UpdateKeeper implements Runnable{
 	
 	public static interface UpdateJob{
 		public void update() throws IOException ;
+
 	}
+		
+	final static int INTERVAL = 1 * 60 * 1000;
 	
-	
-	final static int INTEVER = 2 * 60 * 1000;
-	
-	private static TimelyThread singleton;
+	private static UpdateKeeper singleton;
 	Vector<UpdateJob> filterFactorys;
 	Thread worker;
 
-	private TimelyThread(){
+	private UpdateKeeper(){
 		filterFactorys = new Vector<UpdateJob>();
 
 		worker = new Thread(this);
@@ -25,11 +25,11 @@ public class TimelyThread implements Runnable{
 		worker.start();
 	}
 	
-	public static TimelyThread getInstance(){
+	public static UpdateKeeper getInstance(){
 		if(singleton == null){
-			synchronized(TimelyThread.class){
+			synchronized(UpdateKeeper.class){
 				if(singleton == null){
-					singleton = new TimelyThread();
+					singleton = new UpdateKeeper();
 					return singleton;
 				}
 			}
@@ -38,22 +38,19 @@ public class TimelyThread implements Runnable{
 	}
 	
 	/*保留各个FilterFactory实例对象的引用，用于后期更新操作*/
-	public void register(TimelyThread.UpdateJob filterFactory ){
+	public void register(UpdateKeeper.UpdateJob filterFactory ){
 		filterFactorys.add(filterFactory);
 	}
 	
 	public void run() {
 		while(true){
-			
 			try {
-				Thread.sleep(INTEVER);
+				Thread.sleep(INTERVAL);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			
-			if(!filterFactorys.isEmpty())
-			{
-				System.out.println("------------update--------");
+			if(!filterFactorys.isEmpty()){
 				for(UpdateJob factory: filterFactorys){
 					try {
 						factory.update();
