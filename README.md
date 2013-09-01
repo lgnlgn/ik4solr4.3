@@ -1,17 +1,20 @@
 ik4solr4.3
 ==========
 
-solr4.3的ik分词器（主要改动不是我完成的，只是指点。使用maven）
+solr4.3的ik分词器（改了一些smart分词算法。使用maven）
 
 
 - 支持从solr自己的环境中获取自定义词典（使用solr的ResourceLoader, 只需要把字典文件放到conf目录里）
+- 增加一个定时更新类
+- 在IK中不建议用smart分词，因为它并不十分好用，如果未来有时间，我会提供ansj的SOLR接口
 
-- 增加一个定时更新的停用词、同义词工厂类
+**这是一次新的改变，如果你还用旧的，请注意更新了，由于曾经疏忽，旧版本并发下有问题**
 
+**推荐可以结合另外一个动态[停用词分词器](https://github.com/lgnlgn/stop4solr4.x)使用**
 
 ----------
 
-============我是分割线====以下是详细说明================
+======以下是详细说明，不想了解太细的从第`五`点开始看，注意看完所有说明======
 
 ----------
 
@@ -28,21 +31,7 @@ solr4.3的ik分词器（主要改动不是我完成的，只是指点。使用ma
 	在DictCharNode.java中：
 	用HashMap实现了单字和字频的存储。
 
-	③、实现solr的接口
-	在org.wltea.analyzer.lucene包中。
-	一、IKHandler.java：用于处理HTTP请求，现只实现主词典的动态请求加载。
-		请求参数：http://xxx/ikupdate?dicpath=dic.txt
-		注意事项：1、多个字典文件以逗号分隔。
-				  2、在Zookeeper集群上时，得先上传修改后的字典文件，再更新。
-				3、！！！！如果是cloud环境，需要对每台机器分别请求！！！！
-		使用方法：需在solrconfig.xml中配置
-	<requestHandler name="/ikupdate" class="org.wltea.analyzer.lucene.IKHandler">
-     	<lst name="defaults">
-     	</lst> 
-  	</requestHandler>
-	可以配置默认参数
-	<str name=”dicpath”>dic.txt</str>
-	加入jar包存放位置（可选）：<lib dir="/data/solr-4.3.0/example/solr/collection1/lib" />
+
 	
 	二、IKTokenizerFactory.java
 	IKTokenizer.java：用于生成IK分词器实例对象。
@@ -50,32 +39,41 @@ solr4.3的ik分词器（主要改动不是我完成的，只是指点。使用ma
 		使用方法：在schema.xml中，增加dicpath配置项，每次生成对象时，都会加载。
 				  字典重建已封装在Dictionary类中，addDic2MainDic()函数
 
-	三、IKStopFilter.java
-	IKStopFilterFactory.java：停止词过滤
-	IKSynonymFilterFactory.java：同义词过滤
-		注意事项：1、字典的切换采用solr默认接口实现
-				  2、2个过滤器在schema.xml均增加了autoupdate配置项，为true，则						会定时去更新字典文件。
-		使用方法：在schema.xml中，添加自己的过滤器类，增加配置项。
 
-	四、TimelyThread.java：
-	停止词和同义词更新管理类，如果设置了autoupdate=true，则注册到此管理类中，由管理类定时去触发更新操作。
+	四、UpdateKeeper.java：
+		定时扫描配置文件，并执行更新
 	
 	五、schema.xml示例( md格式用得不熟，格式可能需要调整，比如小于号和文字原来是连着的)
 
 
 
-      < fieldType name="text_cn" class="solr.TextField" positionIncrementGap="100" >        
-   
-      <analyzer type="index" >       
-        < tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="false" />
-        < filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
-       < filter class="solr.LowerCaseFilterFactory"/>
-      < /analyzer>
 
-      < analyzer type="query">
-        <tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="false" dicPath="extDic.txt"/>
-        <filter class="org.wltea.analyzer.lucene.IKStopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" autoupdate="true"/>
-		<filter class="org.wltea.analyzer.lucene.IKSynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true" autoupdate="true"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
+    <fieldType name="text_cn" class="solr.TextField" positionIncrementGap="100" >  
+      <analyzer type="index" >   
+      <tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="false" conf="ik.conf"/>
+       <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+       <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
-      </fieldType>
+
+      <analyzer type="query">
+       <tokenizer class="org.wltea.analyzer.lucene.IKTokenizerFactory" useSmart="false" conf="ik.conf"/>
+      </analyzer>
+     </fieldType>
+
+useSmart表示是否使用智能分词，建议false
+
+conf执行配置文件路径，是个Properties格式的文本：
+
+     lastupdate=123
+     files=extDic.txt,aaa.txt
+
+  其中lastupdate 是一个数字，只要这次比上一次大就会触发更新操作，可以用时间戳
+files是用户词库，以**英文逗号**隔开
+
+
+
+
+## 特别说明： ##
+1. IK分词的词库是单例，因此在整个collection中，所有地方都共享一个词库。
+那么单例会不会跨collection，根据我的实验，如果schema的名字不一样就可以避免，如果schema名字一样，还是会使用单例。
+2. 定时器也是单例，但根据一些GC工具查看，定时器线程貌似不会在collection卸载以后被回收，多个collection使用定时器对象数量也没增加。这里我并不是很确定，如果你使用了IK分词器，并在你的SOLR里进行了多次索引创建卸载的操作，建议做一下重启
