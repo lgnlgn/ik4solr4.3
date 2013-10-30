@@ -1,7 +1,8 @@
 ik4solr4.3
 ==========
 
-solr4.3的ik分词器（改了一些smart分词算法。使用maven）
+solr4.3的ik分词器（改了一些smart分词算法。使用maven编译），隔壁有我写的[ansj的solr接口](https://github.com/lgnlgn/ansj4solr)包
+
 
 
 - 支持从solr自己的环境中获取自定义词典（使用solr的ResourceLoader, 只需要把字典文件放到conf目录里）
