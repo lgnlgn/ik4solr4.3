@@ -5,7 +5,7 @@ solr4.3的ik分词器（改了一些smart分词算法。使用maven编译），�
 
 
 
-- 支持从solr自己的环境中获取自定义词典（使用solr的ResourceLoader, 只需要把字典文件放到conf目录里）
+- 支持从solr自己的环境中获取自定义词典（使用solr的ResourceLoader, 只需要把字典文件放到对应索引的conf目录里）
 - 增加一个定时更新类
 - 在IK中不建议用smart分词，因为它并不怎么准，ansj的分词效果明显更好。
 
