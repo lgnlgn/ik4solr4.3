@@ -1,4 +1,4 @@
-ik4solr4.3
+ik4solr4.3(不再维护，未来可能删除：请去https://github.com/mlcsdev/mlcsseg)
 ==========
 
 solr4.3的ik分词器（改了一些smart分词算法。使用maven编译），隔壁有我写的[ansj的solr接口](https://github.com/lgnlgn/ansj4solr)包
